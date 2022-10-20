@@ -3,7 +3,6 @@ package protocol
 import (
 	"github.com/unsurper/dlt645go/errors"
 	"strconv"
-	"time"
 )
 
 // 封包信息
@@ -15,10 +14,11 @@ type Packet struct {
 // 消息头
 type Header struct {
 	MsgID       MsgID
-	DecID       uint64    //燃气表标识
-	LocID       string    //远传表位置号
-	Uptime      time.Time //上传时间
 	Property    Property
+	Ver         string `json:"ver"`
+	Csp         uint64 `json:"csp"`
+	Imei        string `json:"imei"`
+	ICID        string `json:"iccid"`
 	IccID       uint64
 	MsgSerialNo uint16
 	Packet      *Packet

@@ -1,11 +1,10 @@
-package tancy
+package dlt
 
 import (
 	"bytes"
 	"crypto/rsa"
 	"encoding/hex"
 	"fmt"
-	"github.com/deatil/go-crc16/crc16"
 	"github.com/funny/link"
 	log "github.com/sirupsen/logrus"
 	"github.com/unsurper/dlt645go/errors"
@@ -141,61 +140,16 @@ func (codec *ProtocolCodec) readFromBuffer() (protocol.Message, bool, error) {
 		return protocol.Message{}, false, nil
 	}
 
-	dataa := codec.bufferReceiving.Bytes()
+	data := codec.bufferReceiving.Bytes()
 
-	var data []byte
-	if dataa[0] == 51 && dataa[1] == 101 {
-		// to hex
-		var err error
-		data, err = hex.DecodeString(string(dataa))
-		if err != nil {
-			log.WithFields(log.Fields{
-				"data":   fmt.Sprintf("%s", dataa),
-				"reason": err,
-			}).Error("[tancy-flow] failed to hex.DecodeString")
-			return protocol.Message{}, false, errors.ErrNotFoundPrefixID
-		}
-	} else {
-		data = dataa
-	}
 	end := 0
 
 	if data[0] != protocol.RegisterByte && data[0] != protocol.SendByte && data[0] != protocol.ReceiveByte {
-
 		log.WithFields(log.Fields{
 			"data":   fmt.Sprintf("%s", data),
 			"reason": errors.ErrNotFoundPrefixID,
-		}).Debug("[tancy-flow] failed to receive message")
+		}).Debug("[dlt645] failed to receive message for ErrNotFoundPrefixID")
 		return protocol.Message{}, false, errors.ErrNotFoundPrefixID
-	}
-
-	//CRC16验证
-	if data[0] == protocol.SendByte || data[0] == protocol.ReceiveByte {
-
-		var datalen int
-		datalen = int(data[1])
-		if datalen != len(data) {
-			log.WithFields(log.Fields{
-				"data":   hex.EncodeToString(data),
-				"reason": errors.ErrNotFoundPrefixID,
-			}).Error("[tancy-flow] datalength is wrong")
-			return protocol.Message{}, false, errors.ErrNotFoundPrefixID
-		}
-		crc16Hash := crc16.NewCRC16Hash(crc16.CRC16_MODBUS)
-		crc16Hash.Write(data[:datalen-2])
-		crc16HashData := crc16Hash.Sum(nil)
-		crc16HashData2 := hex.EncodeToString(crc16HashData)
-		dataHash := hex.EncodeToString(data[datalen-2:])
-		data[datalen-2], data[datalen-1] = data[datalen-1], data[datalen-2]
-		dataHash2 := hex.EncodeToString(data[datalen-2:])
-		//fmt.Println(dataHash, crc16HashData2)
-		if dataHash != crc16HashData2 && dataHash2 != crc16HashData2 {
-			log.WithFields(log.Fields{
-				"data":   hex.EncodeToString(data),
-				"reason": errors.ErrCRC16Failed,
-			}).Error("[tancy-flow] CRC16 is Wrong")
-			return protocol.Message{}, false, errors.ErrCRC16Failed
-		}
 	}
 
 	var message protocol.Message
@@ -203,11 +157,11 @@ func (codec *ProtocolCodec) readFromBuffer() (protocol.Message, bool, error) {
 		log.WithFields(log.Fields{
 			"data":   fmt.Sprintf("0x%x", hex.EncodeToString(data)),
 			"reason": err,
-		}).Error("[tancy-flow] failed to receive message")
+		}).Error("[dlt645] failed to receive message")
 		return protocol.Message{}, false, err
 	}
 
-	codec.bufferReceiving.Next(end + len(dataa)) //读取长度+len(dataa)
+	codec.bufferReceiving.Next(end + len(data)) //读取长度+len(dataa)
 
 	log.WithFields(log.Fields{
 		"device_id":   message.Header.IccID,

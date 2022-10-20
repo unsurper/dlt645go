@@ -2,16 +2,15 @@ package protocol
 
 const (
 	//注册
-	RegisterByte = byte(0x40)
+	RegisterByte = byte(0x7B)
 
 	//发送
-	SendByte = byte(0x3c)
+	SendByte = byte(0xFE)
 
 	//接收
-	ReceiveByte = byte(0x3e)
+	ReceiveByte = byte(0x68)
 
 	// IP位
-	IPByte = byte(0x49)
 
 	// 标志位
 	PrefixID = byte(0x7e)

@@ -3,7 +3,7 @@ package protocol
 import (
 	"bytes"
 	"crypto/rsa"
-	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"github.com/unsurper/dlt645go/errors"
@@ -46,36 +46,28 @@ func (message *Message) Encode(key ...*rsa.PublicKey) ([]byte, error) {
 // 协议解码
 func (message *Message) Decode(data []byte, key ...*rsa.PrivateKey) error {
 	// 检验标志位
-	if len(data) < 2 || (data[0] != ReceiveByte && data[0] != RegisterByte) {
+	if len(data) == 0 {
 		return errors.ErrInvalidMessage
 	}
-	if len(data) == 0 {
+	if data[0] != ReceiveByte && data[0] != RegisterByte {
 		return errors.ErrInvalidMessage
 	}
 
 	var header Header
 	var err error
-
 	//处理注册包
 	if data[0] == RegisterByte {
-		i := 2
-		for ; i < len(data); i++ {
-			if data[i] == IPByte {
-				break
-			}
-		}
-		IccID, err := strconv.Atoi(string(data[2:i]))
-		if err != nil {
-			return err
-		}
-		header.MsgID = MsgID(data[1]) //消息ID
-		header.IccID = uint64(IccID)  //用户名唯一标识码
-		log.WithFields(log.Fields{
-			"DTU": fmt.Sprintf("user: %s online", data[2:i]),
-		}).Info("Register DTU")
-		entity, _, err := message.decode(uint16(header.MsgID), data) //解析实体对象 entity     buffer : 为消息标识
+
+		header := Header{}
+		json.Unmarshal(data, &header)
+
+		//fmt.Println(header.Imei)
+		//fmt.Println()
+
+		header.IccID, err = strconv.ParseUint(header.Imei, 10, 64)
+		header.MsgID = 0x0040 //消息ID
 		if err == nil {
-			message.Body = entity
+			message.Body = nil
 		} else {
 			log.WithFields(log.Fields{
 				"id":     fmt.Sprintf("0x%x", header.MsgID),
@@ -84,16 +76,10 @@ func (message *Message) Decode(data []byte, key ...*rsa.PrivateKey) error {
 		}
 		message.Header = header
 		return nil
-	}
+	} else {
+		header.MsgID = MsgID(data[8])                                   //消息ID
+		entity, _, err := message.decode(uint16(header.MsgID), data[:]) //解析实体对象 entity     buffer : 为消息标识
 
-	//处理响应信号强度报文
-	if data[2] == 0x17 {
-
-		header.MsgID = MsgID(data[2]) //消息ID
-		header.IccID = uint64(0)      //用户名唯一标识码
-		DecID, _ := strconv.Atoi(bcdToString(data[3:5]))
-		header.DecID = uint64(DecID)                                     //燃气表唯一标识码
-		entity, _, err := message.decode(uint16(header.MsgID), data[3:]) //解析实体对象 entity     buffer : 为消息标识
 		if err == nil {
 			message.Body = entity
 		} else {
@@ -102,49 +88,8 @@ func (message *Message) Decode(data []byte, key ...*rsa.PrivateKey) error {
 				"reason": err,
 			}).Warn("failed to decode message")
 		}
-		message.Header = header
-		return nil
 	}
 
-	header.MsgID = MsgID(data[2]) //消息ID
-
-	dec := bcdToString(data[3:11])
-	if dec != "" {
-		DecID, err := strconv.Atoi(dec)
-		if err != nil {
-			return err
-		}
-		header.DecID = uint64(DecID) //燃气表唯一标识码
-	} else {
-		header.DecID = uint64(0) //燃气表唯一标识码
-	}
-
-	header.LocID = hex.EncodeToString(data[11:19]) //远传位置号
-
-	iic := bcdToString(data[19:25])
-	if iic != "" {
-		IccID, err := strconv.Atoi(iic)
-		if err != nil {
-			return err
-		}
-		header.IccID = uint64(IccID) //用户唯一标识码
-	}
-
-	header.Uptime, err = fromBCDTime(data[25:31]) //打包上传时间
-	if err != nil {
-		return err
-	}
-
-	entity, _, err := message.decode(uint16(header.MsgID), data[31:]) //解析实体对象 entity     buffer : 为消息标识
-
-	if err == nil {
-		message.Body = entity
-	} else {
-		log.WithFields(log.Fields{
-			"id":     fmt.Sprintf("0x%x", header.MsgID),
-			"reason": err,
-		}).Warn("failed to decode message")
-	}
 	message.Header = header
 	return nil
 }

@@ -1,4 +1,4 @@
-package tancy
+package dlt
 
 import (
 	"github.com/funny/link"
