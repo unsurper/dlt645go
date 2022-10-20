@@ -16,7 +16,7 @@ type sessionHandler struct {
 func (handler sessionHandler) HandleSession(sess *link.Session) {
 	log.WithFields(log.Fields{
 		"id": sess.ID(),
-	}).Debug("[tancy-flow] new session created")
+	}).Debug("[dlt645] new session created")
 
 	// 创建Session
 	session := newSession(handler.server, sess)

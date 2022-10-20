@@ -109,7 +109,7 @@ func (session *Session) message(message *protocol.Message) {
 				"id":  session.ID(),
 				"old": old,
 				"new": message.Header.IccID,
-			}).Warn("[tancy-flow] terminal IccID is inconsistent")
+			}).Warn("[dlt645] terminal IccID is inconsistent")
 		}
 		atomic.StoreUint64(&session.iccID, message.Header.IccID)
 	}

@@ -78,7 +78,7 @@ func (server *Server) Run(network string, port int) error {
 		privateKey: server.privateKey,
 	}
 	server.server = link.NewServer(listen, &p, 24, server.handler)
-	log.Infof("[tancy-flow] protocol server started on %s", address)
+	log.Infof("[dlt645] protocol server started on %s", address)
 	return server.server.Serve()
 }
 
