@@ -58,7 +58,7 @@ func (session *Session) Send(entity protocol.Entity) (uint16, error) {
 	//test
 	log.WithFields(log.Fields{
 		"data": fmt.Sprintf("V: %v", message),
-	}).Info("receive data \n")
+	}).Info("send data \n")
 
 	err := session.session.Send(message)
 	if err != nil {

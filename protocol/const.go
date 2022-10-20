@@ -11,7 +11,7 @@ const (
 	ReceiveByte = byte(0x68)
 
 	// IP位
-
+	CRID = byte(0x16)
 	// 标志位
 	PrefixID = byte(0x7e)
 

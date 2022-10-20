@@ -27,7 +27,6 @@ func (message *Message) Encode(key ...*rsa.PublicKey) ([]byte, error) {
 	var err error
 	var body []byte
 	if message.Body != nil && !reflect.ValueOf(message.Body).IsNil() {
-
 		body, err = message.Body.Encode()
 		if err != nil {
 			return nil, err
@@ -39,7 +38,6 @@ func (message *Message) Encode(key ...*rsa.PublicKey) ([]byte, error) {
 	buffer := bytes.NewBuffer(nil)
 
 	message.write(buffer, body)
-
 	return buffer.Bytes(), nil
 }
 

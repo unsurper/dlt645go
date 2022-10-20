@@ -143,6 +143,16 @@ func (codec *ProtocolCodec) readFromBuffer() (protocol.Message, bool, error) {
 	data := codec.bufferReceiving.Bytes()
 
 	end := 0
+	if data[0] != protocol.RegisterByte {
+		for i := 0; i < len(data); i++ {
+			if data[i] == protocol.CRID {
+				end = i + 1
+				break
+			}
+		}
+	} else {
+		end = len(data)
+	}
 
 	if data[0] != protocol.RegisterByte && data[0] != protocol.SendByte && data[0] != protocol.ReceiveByte {
 		log.WithFields(log.Fields{
@@ -153,7 +163,7 @@ func (codec *ProtocolCodec) readFromBuffer() (protocol.Message, bool, error) {
 	}
 
 	var message protocol.Message
-	if err := message.Decode(data, codec.privateKey); err != nil {
+	if err := message.Decode(data[:end], codec.privateKey); err != nil {
 		log.WithFields(log.Fields{
 			"data":   fmt.Sprintf("0x%x", hex.EncodeToString(data)),
 			"reason": err,
@@ -161,7 +171,7 @@ func (codec *ProtocolCodec) readFromBuffer() (protocol.Message, bool, error) {
 		return protocol.Message{}, false, err
 	}
 
-	codec.bufferReceiving.Next(end + len(data)) //读取长度+len(dataa)
+	codec.bufferReceiving.Next(end) //读取长度+len(dataa)
 
 	log.WithFields(log.Fields{
 		"device_id":   message.Header.IccID,
