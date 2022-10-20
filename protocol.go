@@ -143,6 +143,7 @@ func (codec *ProtocolCodec) readFromBuffer() (protocol.Message, bool, error) {
 	data := codec.bufferReceiving.Bytes()
 
 	end := 0
+	//CR验证数据包是否有误
 	if data[0] != protocol.RegisterByte {
 		for i := 0; i < len(data); i++ {
 			if data[i] == protocol.CRID {

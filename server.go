@@ -153,13 +153,13 @@ func (server *Server) handleClose(session *Session) {
 func (server *Server) dispatchMessage(session *Session, message *protocol.Message) {
 	log.WithFields(log.Fields{
 		"id": fmt.Sprintf("0x%x", message.Header.MsgID),
-	}).Trace("[tancy-flow] dispatch message")
+	}).Trace("[dlt645] dispatch message")
 
 	handler, ok := server.messageHandlers.Load(message.Header.MsgID)
 	if !ok {
 		log.WithFields(log.Fields{
 			"id": fmt.Sprintf("0x%x", message.Header.MsgID),
-		}).Info("[tancy-flow] dispatch message canceled, handler not found")
+		}).Info("[dlt645] dispatch message canceled, handler not found")
 		return
 	}
 
