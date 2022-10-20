@@ -191,13 +191,11 @@ func (codec *ProtocolCodec) readFromBuffer() (protocol.Message, bool, error) {
 	codec.bufferReceiving.Next(end) //读取长度+len(dataa)
 
 	log.WithFields(log.Fields{
-		"device_id":   message.Header.IccID,
 		"msg_type_id": fmt.Sprintf("%X", message.Header.MsgID),
 	}).Debug("RX:")
 
 	log.WithFields(log.Fields{
-		"device_id": message.Header.IccID,
-		"hex":       fmt.Sprintf("%0X", data[:]),
+		"hex": fmt.Sprintf("%0X", data[:]),
 		//"Hex": fmt.Sprintf("0x%x", hex.EncodeToString(data[:end+1])),
 	}).Trace("RX Raw:")
 
