@@ -43,6 +43,7 @@ func (entity *Dlt_0x0091) Decode(data []byte) (int, error) {
 		bytea[i], bytea[j] = bytea[j], bytea[i]
 	}
 	entity.DeviceID = hex.EncodeToString(bytea)
+	//正向总电能每个字节-33,1-4,分别为,小数位,个位,百位,万位
 	byteb := make([]byte, 4)
 	for i := 0; i < 4; i++ {
 		byteb[i] = data[14+i] - 0x33

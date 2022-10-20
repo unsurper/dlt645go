@@ -146,9 +146,25 @@ func (codec *ProtocolCodec) readFromBuffer() (protocol.Message, bool, error) {
 	if data[0] != protocol.RegisterByte {
 		for i := 0; i < len(data); i++ {
 			if data[i] == protocol.CRID {
-				end = i + 1
-				break
+				if i > 8 {
+					var one byte
+					for _, v := range data[:i-1] {
+						one += v
+					}
+					if data[i-1] == one {
+						end = i + 1
+						break
+					}
+				}
 			}
+		}
+		if end == 0 {
+			codec.bufferReceiving.Next(len(data))
+			log.WithFields(log.Fields{
+				"data":   hex.EncodeToString(data),
+				"reason": "[dlt645] failed to find CRID",
+			}).Error("[dlt645] failed to find CRID")
+			return protocol.Message{}, false, nil
 		}
 	} else {
 		end = len(data)
@@ -165,7 +181,7 @@ func (codec *ProtocolCodec) readFromBuffer() (protocol.Message, bool, error) {
 	var message protocol.Message
 	if err := message.Decode(data[:end], codec.privateKey); err != nil {
 		log.WithFields(log.Fields{
-			"data":   fmt.Sprintf("0x%x", hex.EncodeToString(data)),
+			"data":   fmt.Sprintf("%s", hex.EncodeToString(data)),
 			"reason": err,
 		}).Error("[dlt645] failed to receive message")
 		return protocol.Message{}, false, err

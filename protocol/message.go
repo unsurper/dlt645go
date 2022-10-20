@@ -74,6 +74,11 @@ func (message *Message) Decode(data []byte, key ...*rsa.PrivateKey) error {
 		}
 		message.Header = header
 		return nil
+	} else if len(data) < 8 {
+		log.WithFields(log.Fields{
+			"data":   fmt.Sprintf("V:%v", data),
+			"reason": "error datalen",
+		}).Warn("failed to decode message")
 	} else {
 		header.MsgID = MsgID(data[8])                                   //消息ID
 		entity, _, err := message.decode(uint16(header.MsgID), data[:]) //解析实体对象 entity     buffer : 为消息标识
