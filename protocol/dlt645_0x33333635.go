@@ -5,26 +5,26 @@ import (
 	"strconv"
 )
 
-type Dlt_0x0091 struct {
-	//接收符号
+type Dlt_0x33333635 struct {
+	//接收表号
 	Devicename []byte
-	//修改前仪表参数
+	//表号
 	DeviceID string
-	//修改前仪表参数
-	WP float64
+	//当前总有功功率
+	Active_power float64
 }
 
-func (entity *Dlt_0x0091) MsgID() MsgID {
-	return Msgdlt_0x0091
+func (entity *Dlt_0x33333635) MsgID() MsgID {
+	return Msgdlt_0x33333635
 }
 
-func (entity *Dlt_0x0091) Encode() ([]byte, error) {
+func (entity *Dlt_0x33333635) Encode() ([]byte, error) {
 	writer := NewWriter()
 
 	// 接收符号
 	writer.Write([]byte{0xFE, 0xFE, 0x68})
 	writer.Write(entity.Devicename)
-	writer.Write([]byte{0x68, 0x11, 0x04, 0x33, 0x33, 0x34, 0x33})
+	writer.Write([]byte{0x68, 0x11, 0x04, 0x33, 0x33, 0x36, 0x35})
 
 	//cs效验位
 	var one byte
@@ -37,19 +37,19 @@ func (entity *Dlt_0x0091) Encode() ([]byte, error) {
 	return writer.Bytes(), nil
 }
 
-func (entity *Dlt_0x0091) Decode(data []byte) (int, error) {
+func (entity *Dlt_0x33333635) Decode(data []byte) (int, error) {
 	bytea := data[1:7]
 	for i, j := 0, len(bytea)-1; i < j; i, j = i+1, j-1 {
 		bytea[i], bytea[j] = bytea[j], bytea[i]
 	}
 	entity.DeviceID = hex.EncodeToString(bytea)
 	//正向总电能每个字节-33,1-4,分别为,小数位,个位,百位,万位
-	byteb := make([]byte, 4)
-	for i := 0; i < 4; i++ {
+	byteb := make([]byte, 3)
+	for i := 0; i < 3; i++ {
 		byteb[i] = data[14+i] - 0x33
 	}
 	var err error
-	entity.WP, err = stringtoWP(hex.EncodeToString(byteb))
+	entity.Active_power, err = stringtoActive_power(hex.EncodeToString(byteb))
 	if err != nil {
 		return 0, err
 	}
@@ -57,11 +57,10 @@ func (entity *Dlt_0x0091) Decode(data []byte) (int, error) {
 	return len(data), nil
 }
 
-func stringtoWP(s string) (float64, error) {
+func stringtoActive_power(s string) (float64, error) {
 	a0, _ := strconv.ParseFloat(s[0:2], 64)
 	a1, _ := strconv.ParseFloat(s[2:4], 64)
 	a2, _ := strconv.ParseFloat(s[4:6], 64)
-	a3, _ := strconv.ParseFloat(s[6:8], 64)
-	res := a0*0.01 + a1 + a2*100 + a3*10000
+	res := a0*0.0001 + a1*0.01 + a2
 	return res, nil
 }

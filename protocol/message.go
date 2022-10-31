@@ -3,6 +3,7 @@ package protocol
 import (
 	"bytes"
 	"crypto/rsa"
+	"encoding/binary"
 	"encoding/json"
 	"fmt"
 	log "github.com/sirupsen/logrus"
@@ -80,9 +81,8 @@ func (message *Message) Decode(data []byte, key ...*rsa.PrivateKey) error {
 			"reason": "error datalen",
 		}).Warn("failed to decode message")
 	} else {
-		header.MsgID = MsgID(data[8])                                   //消息ID
-		entity, _, err := message.decode(uint16(header.MsgID), data[:]) //解析实体对象 entity     buffer : 为消息标识
-
+		header.MsgID = MsgID(binary.BigEndian.Uint32(data[10:15]))      //消息ID
+		entity, _, err := message.decode(uint32(header.MsgID), data[:]) //解析实体对象 entity     buffer : 为消息标识
 		if err == nil {
 			message.Body = entity
 		} else {
@@ -98,7 +98,7 @@ func (message *Message) Decode(data []byte, key ...*rsa.PrivateKey) error {
 }
 
 //--->
-func (message *Message) decode(typ uint16, data []byte) (Entity, int, error) {
+func (message *Message) decode(typ uint32, data []byte) (Entity, int, error) {
 	creator, ok := entityMapper[typ]
 	if !ok {
 		return nil, 0, errors.ErrTypeNotRegistered
