@@ -10,7 +10,7 @@ type Dlt_0x33333433 struct {
 	Devicename []byte
 	//表号
 	DeviceID string
-	//修改前仪表参数
+	//正向有功总电能
 	WP float64
 }
 
