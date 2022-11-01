@@ -12,6 +12,7 @@ require (
 	github.com/onsi/gomega v1.20.1 // indirect
 	github.com/shopspring/decimal v0.0.0-20200227202807-02e2044944cc
 	github.com/sirupsen/logrus v1.4.2
+	github.com/stretchr/testify v1.5.1 // indirect
 	github.com/x-cray/logrus-prefixed-formatter v0.5.2
 	golang.org/x/crypto v0.0.0-20220829220503-c86fa9a7ed90 // indirect
 	golang.org/x/text v0.3.7
