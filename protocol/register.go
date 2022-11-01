@@ -28,6 +28,8 @@ const (
 	Msgdlt_0x33333735 MsgID = 0x33333735
 	//总功率因数
 	Msgdlt_0x33333935 MsgID = 0x33333935
+	//当前视在功率
+	Msgdlt_0x33333835 MsgID = 0x33333835
 )
 
 // 消息实体映射
@@ -68,6 +70,9 @@ var entityMapper = map[uint32]func() Entity{
 	},
 	uint32(Msgdlt_0x33333935): func() Entity {
 		return new(Dlt_0x33333935)
+	},
+	uint32(Msgdlt_0x33333835): func() Entity {
+		return new(Dlt_0x33333835)
 	},
 }
 
