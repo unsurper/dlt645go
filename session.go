@@ -2,7 +2,6 @@ package dlt
 
 import (
 	"errors"
-	"fmt"
 	"github.com/funny/link"
 	log "github.com/sirupsen/logrus"
 	"github.com/unsurper/dlt645go/protocol"
@@ -50,16 +49,11 @@ func (session *Session) Send(entity protocol.Entity) (uint16, error) {
 	message := protocol.Message{
 		Body: entity,
 		Header: protocol.Header{
-			MsgID:       entity.MsgID(),
-			IccID:       atomic.LoadUint64(&session.iccID),
-			MsgSerialNo: session.nextID(),
+			MsgID: entity.MsgID(),
+			IccID: atomic.LoadUint64(&session.iccID),
+			//MsgSerialNo: session.nextID(),
 		},
 	}
-	//test
-	log.WithFields(log.Fields{
-		"data": fmt.Sprintf("V: %v", message),
-	}).Info("send data \n")
-
 	err := session.session.Send(message)
 	if err != nil {
 		return 0, err

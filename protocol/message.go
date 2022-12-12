@@ -34,12 +34,10 @@ func (message *Message) Encode(key ...*rsa.PublicKey) ([]byte, error) {
 		}
 
 	}
-
-	// 二进制转义
-	buffer := bytes.NewBuffer(nil)
-
-	message.write(buffer, body)
-	return buffer.Bytes(), nil
+	log.WithFields(log.Fields{
+		"data": fmt.Sprintf("HEX: %x", body),
+	}).Info("send data \n")
+	return body, nil
 }
 
 // 协议解码
